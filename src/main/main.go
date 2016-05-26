@@ -49,7 +49,7 @@ func main() {
 	}()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "<html><body><img src='/random.gif'/></body></html>")
+		fmt.Fprint(w, "<html><head><meta http-equiv='refresh' content='300'></head><body><img src='/random.gif'/></body></html>")
 
 	})
 
