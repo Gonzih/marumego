@@ -42,6 +42,11 @@ func main() {
 		}
 	}()
 
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "<html><body><img src='/random.gif'/></body></html>")
+
+	})
+
 	http.HandleFunc("/random.gif", func(w http.ResponseWriter, r *http.Request) {
 		randomUrl := getRandomUrl(urls)
 		fmt.Printf("Redirecting to %s\n", randomUrl)
