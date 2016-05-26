@@ -33,6 +33,7 @@ func getRandomUrl(urls string) string {
 
 func main() {
 	urls := getURLs()
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	go func() {
 		for {
