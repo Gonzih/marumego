@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -33,12 +34,16 @@ func getRandomUrl(urls string) string {
 
 func main() {
 	urls := getURLs()
+	urlsMutex := &sync.Mutex{}
+
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	go func() {
 		for {
 			time.Sleep(time.Minute * 10)
 			fmt.Printf("Updating urls\n")
+			urlsMutex.Lock()
+			defer urlsMutex.Unlock()
 			urls = getURLs()
 		}
 	}()
@@ -49,6 +54,8 @@ func main() {
 	})
 
 	http.HandleFunc("/random.gif", func(w http.ResponseWriter, r *http.Request) {
+		urlsMutex.Lock()
+		defer urlsMutex.Unlock()
 		randomUrl := getRandomUrl(urls)
 		fmt.Printf("Redirecting to %s\n", randomUrl)
 		http.Redirect(w, r, randomUrl, 301)
