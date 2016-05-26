@@ -50,7 +50,6 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "<html><head><meta http-equiv='refresh' content='60'><title>Maru!</title></head><body><img src='/random.gif'/></body></html>")
-
 	})
 
 	http.HandleFunc("/random.gif", func(w http.ResponseWriter, r *http.Request) {
