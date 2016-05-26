@@ -57,7 +57,7 @@ func main() {
 		defer urlsMutex.Unlock()
 		randomUrl := getRandomUrl(urls)
 		fmt.Printf("Redirecting to %s\n", randomUrl)
-		http.Redirect(w, r, randomUrl, 301)
+		http.Redirect(w, r, randomUrl, 302)
 	})
 
 	port := os.Getenv("PORT")
