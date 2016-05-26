@@ -47,5 +47,7 @@ func main() {
 		http.Redirect(w, r, randomUrl, 301)
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
