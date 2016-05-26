@@ -25,7 +25,7 @@ func getURLs() string {
 }
 
 func getRandomUrl(urls string) string {
-	urlsArray := strings.Split(urls, "\n")
+	urlsArray := strings.Split(strings.Trim(urls, "\n"), "\n")
 	randomIndex := rand.Intn(len(urlsArray))
 	randomUrl := urlsArray[randomIndex]
 
