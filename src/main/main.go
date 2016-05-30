@@ -34,7 +34,7 @@ func getRandomUrl(urls string) string {
 
 func main() {
 	urls := getURLs()
-	urlsMutex := &sync.Mutex{}
+	urlsMutex := &sync.RWMutex{}
 
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -53,8 +53,8 @@ func main() {
 	})
 
 	http.HandleFunc("/random.gif", func(w http.ResponseWriter, r *http.Request) {
-		urlsMutex.Lock()
-		defer urlsMutex.Unlock()
+		urlsMutex.RLock()
+		defer urlsMutex.RUnlock()
 		randomUrl := getRandomUrl(urls)
 		fmt.Printf("Redirecting to %s\n", randomUrl)
 		http.Redirect(w, r, randomUrl, 302)
