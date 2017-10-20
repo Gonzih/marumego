@@ -1,61 +1,64 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
-	"strings"
-	"sync"
 	"time"
 )
 
-const gifsURL = "https://raw.githubusercontent.com/paulhenrich/marume-server/master/resources/gifs.txt"
+var giphyAPIKey = os.Getenv("GIPHY_API_KEY")
 
-func getURLs() string {
-	resp, _ := http.Get(gifsURL)
+const searchURL = "https://api.giphy.com/v1/gifs/search"
 
-	defer resp.Body.Close()
-
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	return string(body)
+type GiphyResponse struct {
+	Data []struct {
+		Images map[string]struct {
+			URL string `json:"url"`
+		} `json:"images"`
+	} `json:"data"`
 }
 
-func getRandomUrl(urls string) string {
-	urlsArray := strings.Split(strings.Trim(urls, "\n"), "\n")
-	randomIndex := rand.Intn(len(urlsArray))
-	randomUrl := urlsArray[randomIndex]
+func getRandomURL() string {
+	url, _ := url.Parse(searchURL)
+	q := url.Query()
+	q.Set("api_key", giphyAPIKey)
+	q.Set("q", "maru cat")
+	q.Set("limit", "100")
+	url.RawQuery = q.Encode()
 
-	return randomUrl
+	resp, _ := http.Get(url.String())
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var response GiphyResponse
+	json.Unmarshal(body, &response)
+
+	l := len(response.Data)
+
+	if l == 0 {
+		return ""
+		log.Println("Nothing found")
+	}
+
+	n := rand.Intn(l)
+	return response.Data[n].Images["original"].URL
 }
 
 func main() {
-	urls := getURLs()
-	urlsMutex := &sync.RWMutex{}
-
 	rand.Seed(time.Now().UTC().UnixNano())
-
-	go func() {
-		for {
-			time.Sleep(time.Minute * 10)
-			fmt.Printf("Updating urls\n")
-			urlsMutex.Lock()
-			defer urlsMutex.Unlock()
-			urls = getURLs()
-		}
-	}()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "<html><head><meta http-equiv='refresh' content='30'><title>Maru!</title></head><body><img src='/random.gif'/></body></html>")
 	})
 
 	http.HandleFunc("/random.gif", func(w http.ResponseWriter, r *http.Request) {
-		urlsMutex.RLock()
-		defer urlsMutex.RUnlock()
-		randomUrl := getRandomUrl(urls)
+		randomUrl := getRandomURL()
 		fmt.Printf("Redirecting to %s\n", randomUrl)
 		http.Redirect(w, r, randomUrl, 302)
 	})
